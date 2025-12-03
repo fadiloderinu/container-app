@@ -19,10 +19,6 @@ provider "aws" {
   }
 }
 
-# ============================================================================
-# VARIABLES
-# ============================================================================
-
 variable "aws_region" {
   description = "AWS region to deploy resources"
   type        = string
@@ -107,9 +103,6 @@ variable "scale_in_cooldown" {
   default     = 300
 }
 
-# ============================================================================
-# DATA SOURCES
-# ============================================================================
 
 data "aws_availability_zones" "available" {
   state = "available"
@@ -117,9 +110,6 @@ data "aws_availability_zones" "available" {
 
 data "aws_caller_identity" "current" {}
 
-# ============================================================================
-# VPC INFRASTRUCTURE
-# ============================================================================
 
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
@@ -288,10 +278,6 @@ resource "aws_route_table_association" "private_2" {
   route_table_id = aws_route_table.private_2.id
 }
 
-# ============================================================================
-# SECURITY GROUPS
-# ============================================================================
-
 resource "aws_security_group" "alb" {
   name        = "${var.project_name}-alb-sg"
   description = "Security group for ALB"
@@ -347,10 +333,6 @@ resource "aws_security_group" "ecs_tasks" {
   }
 }
 
-# ============================================================================
-# LOAD BALANCER
-# ============================================================================
-
 resource "aws_lb" "main" {
   name               = "${var.project_name}-alb"
   internal           = false
@@ -397,10 +379,6 @@ resource "aws_lb_listener" "app" {
   }
 }
 
-# ============================================================================
-# ECR REPOSITORY
-# ============================================================================
-
 resource "aws_ecr_repository" "app" {
   name                 = var.project_name
   image_tag_mutability = "MUTABLE"
@@ -437,10 +415,6 @@ resource "aws_ecr_repository_policy" "app" {
     ]
   })
 }
-
-# ============================================================================
-# ECS CLUSTER & SERVICES
-# ============================================================================
 
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/${var.project_name}"
@@ -600,10 +574,6 @@ resource "aws_ecs_service" "app" {
   }
 }
 
-# ============================================================================
-# AUTO SCALING
-# ============================================================================
-
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = var.max_capacity
   min_capacity       = var.min_capacity
@@ -643,10 +613,6 @@ resource "aws_appautoscaling_policy" "ecs_policy_scale_in" {
     scale_in_cooldown = var.scale_in_cooldown
   }
 }
-
-# ============================================================================
-# OUTPUTS
-# ============================================================================
 
 output "alb_dns_name" {
   description = "DNS name of the load balancer"
